@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Counter</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Firebase libraries from CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore-compat.js"></script>
+    <!-- Include Bowser library to detect browser information -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bowser/2.11.0/bowser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="display-4">Click Counter</h1>
+            <a href="./index.html">Go Back</a>
+            <p class="lead">Click the image below and see the click count increase!</p>
+            <img id="clickable-element" src="https://www.wordstream.com/wp-content/uploads/2021/07/banner-ads-examples-ncino.jpg" alt="" class="img-fluid">
+            <hr class="my-4">
+            <p class="lead">Number of Clicks: <span style="font-weight: bolder;" id="click-count">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDt6y-yQKLukCMKl6MBnYnQwmZOn4eVwzg",
+            authDomain: "jobs-hunt-5c088.firebaseapp.com",
+            databaseURL: "https://jobs-hunt-5c088-default-rtdb.firebaseio.com",
+            projectId: "jobs-hunt-5c088",
+            storageBucket: "jobs-hunt-5c088.appspot.com",
+            messagingSenderId: "707125078915",
+            appId: "1:707125078915:web:d61d15993e0757cab524b6",
+            measurementId: "G-TRZY6SNM2X"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Sign in anonymously
+        auth.signInAnonymously().catch((error) => {
+            console.error('Authentication error:', error);
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('User signed in:', user);
+            } else {
+                console.log('No user is signed in.');
+            }
+        });
+
+        // Function to update click count with browser and country information
+        async function updateClickCount() {
+            try {
+                // Retrieve browser information
+                const browserInfo = bowser.parse(window.navigator.userAgent);
+                const browserName = browserInfo.browser.name;
+                const browserVersion = browserInfo.browser.version;
+
+                // Retrieve country information based on user's location
+                const country = 'Your Country'; // Mock country for demonstration
+
+                // Update the click count with browser and country information
+                const clickCountRef = db.collection('clickCount').doc();
+                await clickCountRef.set({
+                    browser: {
+                        name: browserName,
+                        version: browserVersion
+                    },
+                    country: country,
+                    count: firebase.firestore.FieldValue.increment(1)
+                });
+                console.log('Click count updated successfully');
+
+                // Fetch and display the updated click count
+                displayClickCount();
+            } catch (error) {
+                console.error('Error updating click count:', error);
+            }
+        }
+
+        // Function to fetch and display the click count
+        async function displayClickCount() {
+            try {
+                const clickCountSnapshot = await db.collection('clickCount').get();
+                let totalClickCount = 0;
+                clickCountSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalClickCount += data.count || 0;
+                });
+                document.getElementById('click-count').textContent = totalClickCount;
+            } catch (error) {
+                console.error('Error fetching click count:', error);
+            }
+        }
+
+        // Add event listener to the clickable element
+        document.getElementById('clickable-element').addEventListener('click', async () => {
+            await updateClickCount();
+            window.location.href = "#";  // Change this to your desired URL
+        });
+
+        // Fetch and display the initial click count
+        displayClickCount();
+    </script>
+</body>
+</html>

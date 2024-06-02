@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Counter</title>
+    <!-- Include Ant Design CSS and JavaScript -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.16.13/antd.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.16.13/antd.min.js"></script>
+    <!-- Include Firebase libraries from CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div>
+        <header style="background-color: #001529; padding: 10px;">
+            <h1 style="color: #fff; text-align: center;">Adds Click Counter</h1>
+        </header>
+        <nav style="background-color: #1890ff; padding: 10px;">
+            <ul style="list-style-type: none; margin: 0; padding: 0; text-align: center;">
+                <li style="display: inline; margin-right: 10px;"><a href="#" style="color: #fff;">Home</a></li>
+                <li style="display: inline; margin-right: 10px;"><a href="./About.html" style="color: #fff;">View Counts</a></li>
+                <li style="display: inline; margin-right: 10px;"><a href="#" style="color: #fff;">Contact</a></li>
+            </ul>
+        </nav>
+        <div style="text-align: center; margin-top: 20px;">
+            <img id="clickable-element" src="https://www.wordstream.com/wp-content/uploads/2021/07/banner-ads-examples-ncino.jpg" alt="" style="max-width: 100%;">
+            <p>click add above</p>
+        </div>
+        <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc;">
+            <h2 style="text-align: center;">Welcome to Click Counter</h2>
+            <p>This is a simple application that counts clicks. Every time you click the image above, the click count will be incremented in the database.</p>
+            <p>You can then use this click count data for analytics or any other purpose.</p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDt6y-yQKLukCMKl6MBnYnQwmZOn4eVwzg",
+            authDomain: "jobs-hunt-5c088.firebaseapp.com",
+            databaseURL: "https://jobs-hunt-5c088-default-rtdb.firebaseio.com",
+            projectId: "jobs-hunt-5c088",
+            storageBucket: "jobs-hunt-5c088.appspot.com",
+            messagingSenderId: "707125078915",
+            appId: "1:707125078915:web:d61d15993e0757cab524b6",
+            measurementId: "G-TRZY6SNM2X"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Sign in anonymously
+        auth.signInAnonymously().catch((error) => {
+            console.error('Authentication error:', error);
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('User signed in:', user);
+            } else {
+                console.log('No user is signed in.');
+            }
+        });
+
+        // Reference to the click count document
+        const clickCountRef = db.collection('clickCount').doc('clickCount');
+
+        // Function to update click count
+        async function updateClickCount() {
+            try {
+                // Update the click count
+                await clickCountRef.set({ count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+                console.log('Click count updated successfully');
+            } catch (error) {
+                console.error('Error updating click count:', error);
+            }
+        }
+
+        // Add event listener to the clickable element
+        document.getElementById('clickable-element').addEventListener('click', async () => {
+            await updateClickCount();
+            window.location.href = "https://naijatuning.com/";  // Change this to your desired URL
+        });
+    </script>
+</body>
+</html>
